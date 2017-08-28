@@ -1,0 +1,17 @@
+---
+- hosts: localhost
+  
+  tasks:
+
+    - include_vars: do_vars.yaml
+
+    - name: add droplet host to inventory
+      tower_host:
+        name: "{{ droplet_name }}"
+        variables:
+          ansible_host: "{{ new_droplet_ip }}"
+        inventory: "Ashley Tower Demo"
+        state: present
+        tower_host: "{{ tower_api_host }}"
+        tower_username: "{{ lookup('env', 'VMWARE_USER') }}"
+        tower_password: "{{ lookup('env', 'VMWARE_PASSWORD') }}"

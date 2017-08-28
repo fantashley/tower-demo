@@ -1,0 +1,24 @@
+---
+- hosts: "{{ droplet_name }}"
+  become: yes
+
+  tasks:
+
+    - name: add docker repo
+      yum_repository:
+        name: dockerrepo
+        description: Docker Repository
+        file: /etc/yum.repos.d/docker
+        baseurl: https://yum.dockerproject.org/repo/main/centos/7
+        enabled: yes
+        gpgcheck: yes
+        gpgkey: https://yum.dockerproject.org/gpg
+
+    - name: install docker
+      yum: name=docker-engine state=present
+
+    - name: start docker
+      service: name=docker state=started
+
+    - name: run nginx container
+      command: docker run -d -P nginx

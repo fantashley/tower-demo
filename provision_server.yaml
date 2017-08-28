@@ -1,0 +1,41 @@
+---
+- hosts: localhost
+
+  tasks:
+
+    - name: include digital ocean vars
+      include_vars: do_vars.yaml
+
+    - debug:
+        var: do_pub_key
+
+    - debug:
+        msg: "{{ lookup('env', 'RAX_API_KEY') }}"
+
+    - name: add ssh key to account
+      digital_ocean:
+        state: present
+        command: ssh
+        name: tower_demo
+        ssh_pub_key: "{{ do_pub_key }}"
+        api_token: "{{ lookup('env', 'RAX_API_KEY') }}"
+      register: ssh_result
+
+    - name: create droplet on digital ocean
+      digital_ocean:
+        state: present
+        command: droplet
+        name: "{{ droplet_name }}"
+        api_token: "{{ lookup('env', 'RAX_API_KEY') }}"
+        ssh_key_ids: "{{ ssh_result.ssh_key.id }}"
+        size_id: 512mb
+        region_id: nyc3
+        image_id: centos-7-x64
+        unique_name: yes
+        wait: yes
+      register: my_droplet
+
+    - name: save ip address of droplet
+      set_stats:
+        data:
+          new_droplet_ip: "{{ my_droplet.droplet.ip_address }}"
